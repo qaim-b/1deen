@@ -1,0 +1,32 @@
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+*.iml
+
+# Local agent folders
+.claude/
+
+# Flutter / Dart
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.pub/
+**/build/
+**/coverage/
+
+# Android / iOS generated
+**/android/.gradle/
+**/android/local.properties
+**/ios/Flutter/ephemeral/
+**/ios/Pods/
+
+# Supabase local
+**/.supabase/
+
+# Env / secrets
+*.env
+*.env.*
+
+# Local diagnostics artifacts
+bugreport-*.zip
