@@ -3,22 +3,22 @@ import 'package:flutter/material.dart';
 class AppColors {
   const AppColors._();
 
-  // Calm (Light): clean neutral + confidence green accent.
-  static const calmIvory = Color(0xFFF6F7F9);
-  static const calmSand = Color(0xFFE5E7EB);
-  static const calmSandLight = Color(0xFFF1F3F5);
-  static const calmTeal = Color(0xFF111111);
-  static const calmTealLight = Color(0xFF2A2A2A);
-  static const calmGold = Color(0xFF0F9D6E);
-  static const calmGoldLight = Color(0xFF2DBA89);
+  // Calm (Light): serif editorial palette.
+  static const calmIvory = Color(0xFFFAFAF8);
+  static const calmSand = Color(0xFFE8E4DF);
+  static const calmSandLight = Color(0xFFF5F3F0);
+  static const calmTeal = Color(0xFF1A1A1A);
+  static const calmTealLight = Color(0xFF2E2E2E);
+  static const calmGold = Color(0xFFB8860B);
+  static const calmGoldLight = Color(0xFFD4A84B);
   static const calmSurface = Color(0xFFFFFFFF);
-  static const calmGreen = Color(0xFF0F9D6E);
+  static const calmGreen = Color(0xFFB8860B);
   static const calmRed = Color(0xFFCC3D3D);
   static const calmGlassWhite = Color(0x40FFFFFF);
-  static const calmGlassBorder = Color(0x2AFFFFFF);
-  static const calmDivider = Color(0x1A111111);
+  static const calmGlassBorder = Color(0x1AE8E4DF);
+  static const calmDivider = Color(0xFFE8E4DF);
   static const calmNavBar = Color(0xF2FFFFFF);
-  static const calmNavIndicator = Color(0x14000000);
+  static const calmNavIndicator = Color(0x14B8860B);
 
   // Discipline (Dark): deep graphite + electric green accent.
   static const disciplineCharcoal = Color(0xFF0A0A0A);
