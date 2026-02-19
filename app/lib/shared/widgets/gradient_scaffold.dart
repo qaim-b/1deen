@@ -109,7 +109,12 @@ class _AnimatedOrbState extends State<_AnimatedOrb>
       height: widget.size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: widget.color.withAlpha(18),
+        gradient: RadialGradient(
+          colors: [
+            widget.color.withAlpha(38),
+            widget.color.withAlpha(0),
+          ],
+        ),
       ),
     );
   }

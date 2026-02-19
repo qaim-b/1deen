@@ -160,7 +160,7 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.calmIvory,
       appBarTheme: AppBarTheme(
         centerTitle: false,
-        backgroundColor: AppColors.calmIvory.withAlpha(220),
+        backgroundColor: Color(0xF0EEF2FF),
         surfaceTintColor: Colors.transparent,
         foregroundColor: AppColors.calmTeal,
         elevation: 0,
@@ -278,7 +278,7 @@ class AppTheme {
       scaffoldBackgroundColor: AppColors.disciplineCharcoal,
       appBarTheme: AppBarTheme(
         centerTitle: false,
-        backgroundColor: AppColors.disciplineCharcoal.withAlpha(230),
+        backgroundColor: Color(0xEE080C10),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         titleTextStyle: GoogleFonts.outfit(

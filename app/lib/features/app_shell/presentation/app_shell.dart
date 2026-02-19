@@ -196,15 +196,19 @@ class _AppShellState extends State<AppShell> {
                   vertical: AppSpacing.xs,
                 ),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withAlpha(isPremium ? 20 : 10),
+                  color: theme.colorScheme.primary.withAlpha(isPremium ? 35 : 22),
                   borderRadius: AppRadii.borderSm,
+                  border: Border.all(
+                    color: theme.colorScheme.primary.withAlpha(isPremium ? 70 : 45),
+                  ),
                 ),
                 child: Text(
                   isPremium ? 'Premium' : 'Free',
                   style: TextStyle(
                     color: theme.colorScheme.primary,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w800,
                     fontSize: 12,
+                    letterSpacing: 0.2,
                   ),
                 ),
               ),

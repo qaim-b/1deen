@@ -9,8 +9,8 @@ class AppGradients {
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
         colors: isDark
-            ? const [Color(0xFF0A0A0A), Color(0xFF101010), Color(0xFF151515)]
-            : const [Color(0xFFF6F7F9), Color(0xFFF0F2F5), Color(0xFFFFFFFF)],
+            ? const [Color(0xFF080C10), Color(0xFF0C1118), Color(0xFF0A0F15)]
+            : const [Color(0xFFEEF2FF), Color(0xFFF0F7FF), Color(0xFFE8F4F0)],
       );
 
   static LinearGradient heroCard({required bool isDark}) => LinearGradient(
