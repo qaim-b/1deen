@@ -147,25 +147,36 @@ class _HomeTabState extends State<HomeTab> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(14),
+                child: Image.asset(
+                  'assets/branding/logo_mark.png',
+                  width: 48,
+                  height: 48,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       '1Deen',
-                      style: GoogleFonts.playfairDisplay(
+                      style: GoogleFonts.manrope(
                         textStyle: theme.textTheme.displaySmall?.copyWith(
                           fontWeight: FontWeight.w800,
+                          letterSpacing: 0.1,
                         ),
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xs),
                     Text(
                       'created by Sara & Isa',
-                      style: GoogleFonts.dmSans(
+                      style: GoogleFonts.manrope(
                         textStyle: theme.textTheme.bodyMedium?.copyWith(
                           color: theme.colorScheme.onSurface.withAlpha(170),
-                          letterSpacing: 0.3,
+                          letterSpacing: 0.2,
                           fontWeight: FontWeight.w500,
                         ),
                       ),

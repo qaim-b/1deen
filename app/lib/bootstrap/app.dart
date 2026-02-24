@@ -165,31 +165,35 @@ class _BrandSplashState extends State<_BrandSplash>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
-                    Icons.mosque_rounded,
-                    color: Color(0xFF73E0B9),
-                    size: 56,
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Image.asset(
+                      'assets/branding/logo_mark.png',
+                      width: 84,
+                      height: 84,
+                      fit: BoxFit.cover,
+                    ),
                   ),
-                  const SizedBox(height: 18),
+                  const SizedBox(height: 16),
                   Text(
                     '1Deen',
-                    style: GoogleFonts.playfairDisplay(
+                    style: GoogleFonts.manrope(
                       textStyle: TextStyle(
                         color: titleColor,
-                        fontSize: 52,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 0.4,
+                        fontSize: 50,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 0.1,
                       ),
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     'created by Sara & Isa',
-                    style: GoogleFonts.dmSans(
+                    style: GoogleFonts.manrope(
                       textStyle: TextStyle(
                         color: subtitleColor,
-                        fontSize: 16,
-                        letterSpacing: 0.3,
+                        fontSize: 15,
+                        letterSpacing: 0.2,
                       ),
                     ),
                   ),

@@ -68,17 +68,18 @@
       color: #ffffff;
     }
     #preload .logo {
-      width: 72px;
-      height: 72px;
-      border-radius: 22px;
+      width: 84px;
+      height: 84px;
+      border-radius: 20px;
       margin: 0 auto 16px auto;
-      display: grid;
-      place-items: center;
-      font-weight: 800;
-      font-size: 30px;
-      color: #ffffff;
-      background: linear-gradient(135deg, #00ad7c, #2f80ed);
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+      overflow: hidden;
+      box-shadow: 0 14px 28px rgba(0, 0, 0, 0.18);
+    }
+    #preload .logo img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
     }
     #preload .title {
       font-size: 46px;
@@ -112,7 +113,7 @@
 <body>
   <div id="preload">
     <div class="wrap">
-      <div class="logo">1D</div>
+      <div class="logo"><img src="icons/Icon-192.png" alt="1Deen logo" /></div>
       <h1 class="title">1Deen</h1>
       <p class="subtitle">created by Sara & Isa</p>
     </div>
