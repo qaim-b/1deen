@@ -93,7 +93,7 @@ class _QuranHubTabState extends State<QuranHubTab> {
                     ButtonSegment(
                       value: QuranSection.surahs,
                       icon: Icon(Icons.menu_book_rounded),
-                      label: Text('Surahs / Juz'),
+                      label: Text('Surah'),
                     ),
                     ButtonSegment(
                       value: QuranSection.notes,
@@ -438,6 +438,7 @@ class QuranReaderPage extends StatefulWidget {
 class _QuranReaderPageState extends State<QuranReaderPage> {
   final _controller = ScrollController();
   bool _showTranslation = false;
+  bool _mushafFlowMode = false;
 
   @override
   void initState() {
@@ -537,76 +538,218 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
                 ? 'Hide English translation'
                 : 'Show English translation',
           ),
+          IconButton(
+            onPressed: () => setState(() => _mushafFlowMode = !_mushafFlowMode),
+            icon: Icon(
+              _mushafFlowMode
+                  ? Icons.view_agenda_rounded
+                  : Icons.view_stream_rounded,
+            ),
+            tooltip: _mushafFlowMode
+                ? 'Switch to verse-by-verse mode'
+                : 'Switch to mushaf flow mode',
+          ),
         ],
       ),
-      body: ListView.builder(
-        controller: _controller,
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-        itemCount: widget.surah.verses.length,
-        itemBuilder: (context, index) {
-          final verse = widget.surah.verses[index];
-          return Container(
-            margin: const EdgeInsets.only(bottom: 10),
-            padding: const EdgeInsets.fromLTRB(14, 10, 14, 14),
-            decoration: BoxDecoration(
-              color: const Color(0xFF1A1E28),
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: Colors.white.withAlpha(16)),
-            ),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(14),
-              onLongPress: () => _addNote(verse.verseId),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Row(
-                    children: [
-                      Text(
-                        '${widget.surah.id}:${verse.verseId}',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          color: Colors.white54,
-                        ),
+      body: _mushafFlowMode
+          ? _buildMushafFlow(theme)
+          : _buildVerseByVerse(theme),
+    );
+  }
+
+  Widget _buildVerseByVerse(ThemeData theme) {
+    return ListView.builder(
+      controller: _controller,
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      itemCount: widget.surah.verses.length,
+      itemBuilder: (context, index) {
+        final verse = widget.surah.verses[index];
+        return Container(
+          margin: const EdgeInsets.only(bottom: 10),
+          padding: const EdgeInsets.fromLTRB(14, 10, 14, 14),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1A1E28),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: Colors.white.withAlpha(16)),
+          ),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(14),
+            onLongPress: () => _addNote(verse.verseId),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      '${widget.surah.id}:${verse.verseId}',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: Colors.white54,
                       ),
-                      const Spacer(),
-                      IconButton(
-                        icon: const Icon(
-                          Icons.bookmark_add_outlined,
-                          color: Colors.white70,
-                        ),
-                        onPressed: () => _toggleBookmark(verse.verseId),
-                      ),
-                    ],
-                  ),
-                  Text(
-                    '${verse.arabic} ?',
-                    textAlign: TextAlign.right,
-                    style: const TextStyle(
-                      fontFamily: 'Amiri',
-                      color: Colors.white,
-                      fontSize: 34,
-                      height: 1.95,
                     ),
-                  ),
-                  if (_showTranslation) ...[
-                    const SizedBox(height: 10),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: Text(
-                        verse.english,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: Colors.white70,
-                          height: 1.6,
-                        ),
+                    const Spacer(),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.bookmark_add_outlined,
+                        color: Colors.white70,
                       ),
+                      onPressed: () => _toggleBookmark(verse.verseId),
                     ),
                   ],
+                ),
+                Text(
+                  '${verse.arabic} ﴿${_toArabicIndic(verse.verseId)}﴾',
+                  textAlign: TextAlign.right,
+                  textDirection: TextDirection.rtl,
+                  style: const TextStyle(
+                    fontFamily: 'Amiri',
+                    color: Colors.white,
+                    fontSize: 34,
+                    height: 1.95,
+                  ),
+                ),
+                if (_showTranslation) ...[
+                  const SizedBox(height: 10),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      verse.english,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.white70,
+                        height: 1.6,
+                      ),
+                    ),
+                  ),
                 ],
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildMushafFlow(ThemeData theme) {
+    final flowText = widget.surah.verses
+        .map((verse) => '${verse.arabic} ﴿${_toArabicIndic(verse.verseId)}﴾')
+        .join('   ');
+
+    return ListView(
+      controller: _controller,
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
+      children: [
+        Row(
+          children: [
+            Text(
+              'Juz ${_estimateJuz(widget.surah.id)}, Hizb ${_estimateHizb(widget.surah.id)}',
+              style: theme.textTheme.titleMedium?.copyWith(color: Colors.white70),
+            ),
+            const Spacer(),
+            Text(
+              '${widget.surah.transliteration}  ${widget.surah.arabicName}',
+              style: theme.textTheme.titleMedium?.copyWith(color: Colors.white70),
+            ),
+          ],
+        ),
+        const SizedBox(height: 18),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: Colors.white.withAlpha(55)),
+            color: Colors.white.withAlpha(6),
+          ),
+          child: Center(
+            child: Text(
+              widget.surah.arabicName,
+              style: const TextStyle(
+                fontFamily: 'Amiri',
+                color: Colors.white,
+                fontSize: 28,
+                height: 1.2,
               ),
             ),
-          );
-        },
-      ),
+          ),
+        ),
+        if (_showBismillah()) ...[
+          const SizedBox(height: 18),
+          const Center(
+            child: Text(
+              'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
+              style: TextStyle(
+                fontFamily: 'Amiri',
+                color: Colors.white,
+                fontSize: 36,
+                height: 1.7,
+              ),
+              textDirection: TextDirection.rtl,
+            ),
+          ),
+        ],
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.fromLTRB(18, 16, 18, 20),
+          decoration: BoxDecoration(
+            color: const Color(0xFF1A1E28),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.white.withAlpha(14)),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                flowText,
+                textAlign: TextAlign.justify,
+                textDirection: TextDirection.rtl,
+                style: const TextStyle(
+                  fontFamily: 'Amiri',
+                  color: Colors.white,
+                  fontSize: 36,
+                  height: 2.0,
+                ),
+              ),
+              if (_showTranslation) ...[
+                const SizedBox(height: 20),
+                ...widget.surah.verses.map(
+                  (verse) => Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: Text(
+                      '${verse.verseId}. ${verse.english}',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.white70,
+                        height: 1.6,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+        const SizedBox(height: 18),
+        Center(
+          child: Text(
+            '${widget.surah.id}',
+            style: theme.textTheme.headlineSmall?.copyWith(color: Colors.white70),
+          ),
+        ),
+      ],
     );
+  }
+
+  bool _showBismillah() {
+    if (widget.surah.id == 9) return false;
+    final first = widget.surah.verses.firstOrNull?.arabic.trim() ?? '';
+    final normalized = first.replaceAll(' ', '');
+    return !normalized.startsWith('بِسْمِ') && !normalized.startsWith('بسم');
+  }
+
+  String _toArabicIndic(int number) {
+    const digits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+    return number
+        .toString()
+        .split('')
+        .map((char) => digits[int.parse(char)])
+        .join();
   }
 
   int _estimateJuz(int surahId) {
@@ -618,6 +761,16 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
     if (surahId <= 36) return 21;
     if (surahId <= 55) return 27;
     return 30;
+  }
+
+  String _estimateHizb(int surahId) {
+    if (surahId <= 2) return '1';
+    if (surahId <= 4) return '8';
+    if (surahId <= 9) return '12';
+    if (surahId <= 18) return '20';
+    if (surahId <= 36) return '32';
+    if (surahId <= 55) return '45';
+    return '60';
   }
 }
 
