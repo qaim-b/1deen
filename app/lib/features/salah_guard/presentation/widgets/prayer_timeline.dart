@@ -1,4 +1,4 @@
-﻿import 'package:app/core/theme/app_spacing.dart';
+import 'package:app/core/theme/app_spacing.dart';
 import 'package:app/features/prayer_times/domain/prayer_time_entry.dart';
 import 'package:app/features/salah_guard/application/prayer_lock_window.dart';
 import 'package:flutter/material.dart';
@@ -63,7 +63,9 @@ class _PrayerRow extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.only(bottom: AppSpacing.xs),
       decoration: BoxDecoration(
-        color: isActive ? theme.colorScheme.primary.withAlpha(10) : theme.cardTheme.color,
+        color: isActive
+            ? theme.colorScheme.primary.withAlpha(10)
+            : theme.cardTheme.color,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
           color: isActive
@@ -74,7 +76,9 @@ class _PrayerRow extends StatelessWidget {
       child: ListTile(
         title: Text(
           prayer.name,
-          style: theme.textTheme.titleSmall?.copyWith(fontWeight: isActive ? FontWeight.w700 : FontWeight.w600),
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: isActive ? FontWeight.w700 : FontWeight.w600,
+          ),
         ),
         subtitle: Text(
           _arabicName(prayer.name),
@@ -98,20 +102,17 @@ class _PrayerRow extends StatelessWidget {
   String _arabicName(String english) {
     switch (english) {
       case 'Fajr':
-        return '?????';
+        return 'الفجر';
       case 'Dhuhr':
-        return '?????';
+        return 'الظهر';
       case 'Asr':
-        return '?????';
+        return 'العصر';
       case 'Maghrib':
-        return '??????';
+        return 'المغرب';
       case 'Isha':
-        return '??????';
+        return 'العشاء';
       default:
         return '';
     }
   }
 }
-
-
-

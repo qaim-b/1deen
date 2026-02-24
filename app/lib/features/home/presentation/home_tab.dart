@@ -464,15 +464,15 @@ class _PrayerList extends StatelessWidget {
   String _arabic(String name) {
     switch (name) {
       case 'Fajr':
-        return '?????';
+        return 'الفجر';
       case 'Dhuhr':
-        return '?????';
+        return 'الظهر';
       case 'Asr':
-        return '?????';
+        return 'العصر';
       case 'Maghrib':
-        return '??????';
+        return 'المغرب';
       case 'Isha':
-        return '??????';
+        return 'العشاء';
       default:
         return '';
     }

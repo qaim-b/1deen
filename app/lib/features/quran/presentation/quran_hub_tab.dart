@@ -443,6 +443,7 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
   bool _showArabic = true;
   bool _showTranslation = false;
   QuranReadingMode _readingMode = QuranReadingMode.readingFlow;
+  static const _bismillah = 'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ';
 
   @override
   void initState() {
@@ -678,11 +679,15 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
       children: [
         Row(
           children: [
-            Text(
-              'Juz ${_estimateJuz(widget.surah.id)}, Hizb ${_estimateHizb(widget.surah.id)}',
-              style: theme.textTheme.titleMedium?.copyWith(color: colors.muted),
+            Expanded(
+              child: Text(
+                'Juz ${_estimateJuz(widget.surah.id)}, Hizb ${_estimateHizb(widget.surah.id)}',
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: colors.muted,
+                ),
+              ),
             ),
-            const Spacer(),
+            const SizedBox(width: 12),
             Text(
               '${widget.surah.transliteration}  ${widget.surah.arabicName}',
               style: theme.textTheme.titleMedium?.copyWith(color: colors.muted),
@@ -690,21 +695,26 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
           ],
         ),
         const SizedBox(height: 18),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: colors.borderStrong),
-            color: colors.panel,
-          ),
-          child: Center(
-            child: Text(
-              widget.surah.arabicName,
-              style: GoogleFonts.notoNaskhArabic(
-                textStyle: TextStyle(
-                  color: colors.foreground,
-                  fontSize: 30,
-                  fontWeight: FontWeight.w700,
+        Align(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 760),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: colors.borderStrong),
+                color: colors.panel,
+              ),
+              child: Center(
+                child: Text(
+                  widget.surah.arabicName,
+                  style: GoogleFonts.notoNaskhArabic(
+                    textStyle: TextStyle(
+                      color: colors.foreground,
+                      fontSize: 30,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -714,7 +724,7 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
           const SizedBox(height: 18),
           Center(
             child: Text(
-              '?????? ??????? ???????????? ??????????',
+              _bismillah,
               textDirection: TextDirection.rtl,
               style: GoogleFonts.notoNaskhArabic(
                 textStyle: TextStyle(
@@ -727,48 +737,57 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
           ),
         ],
         const SizedBox(height: 16),
-        Container(
-          padding: const EdgeInsets.fromLTRB(18, 16, 18, 20),
-          decoration: BoxDecoration(
-            color: colors.panel,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: colors.border),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              if (_showArabic)
-                Directionality(
-                  textDirection: TextDirection.rtl,
-                  child: Text(
-                    flowText,
-                    textAlign: TextAlign.justify,
-                    style: GoogleFonts.notoNaskhArabic(
-                      textStyle: TextStyle(
-                        color: colors.foreground,
-                        fontSize: 37,
-                        height: 2.0,
-                        fontWeight: FontWeight.w500,
+        Align(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 860),
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(18, 16, 18, 20),
+              decoration: BoxDecoration(
+                color: colors.panel,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: colors.border),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  if (_showArabic)
+                    Directionality(
+                      textDirection: TextDirection.rtl,
+                      child: Text(
+                        flowText,
+                        textAlign: TextAlign.justify,
+                        style: GoogleFonts.notoNaskhArabic(
+                          textStyle: TextStyle(
+                            color: colors.foreground,
+                            fontSize: 37,
+                            height: 2.0,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        strutStyle: const StrutStyle(
+                          forceStrutHeight: true,
+                          height: 2.0,
+                        ),
                       ),
                     ),
-                  ),
-                ),
-              if (_showTranslation) ...[
-                const SizedBox(height: 20),
-                ...widget.surah.verses.map(
-                  (verse) => Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: Text(
-                      '${verse.verseId}. ${verse.english}',
-                      style: theme.textTheme.bodyMedium?.copyWith(
-                        color: colors.muted,
-                        height: 1.6,
+                  if (_showTranslation) ...[
+                    const SizedBox(height: 20),
+                    ...widget.surah.verses.map(
+                      (verse) => Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: Text(
+                          '${verse.verseId}. ${verse.english}',
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: colors.muted,
+                            height: 1.6,
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ),
-              ],
-            ],
+                  ],
+                ],
+              ),
+            ),
           ),
         ),
         const SizedBox(height: 18),
