@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
 
@@ -43,3 +43,4 @@ class AppGradients {
             : const [Color(0x400F9D6E), Color(0x000F9D6E)],
       );
 }
+

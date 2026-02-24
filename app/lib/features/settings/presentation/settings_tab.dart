@@ -1,4 +1,4 @@
-import 'package:app/core/diagnostics/diagnostics_controller.dart';
+﻿import 'package:app/core/diagnostics/diagnostics_controller.dart';
 import 'package:app/core/theme/app_spacing.dart';
 import 'package:app/core/theme/app_theme_mode.dart';
 import 'package:app/features/auth/application/auth_controller.dart';
@@ -6,9 +6,7 @@ import 'package:app/features/settings/application/settings_controller.dart';
 import 'package:app/features/settings/domain/app_settings.dart';
 import 'package:app/features/settings/presentation/widgets/settings_section.dart';
 import 'package:app/features/subscription/application/subscription_controller.dart';
-import 'package:app/features/subscription/domain/subscription_tier.dart';
 import 'package:app/shared/widgets/gradient_scaffold.dart';
-import 'package:app/shared/widgets/theme_mode_preview.dart';
 import 'package:flutter/material.dart';
 
 class SettingsTab extends StatelessWidget {
@@ -32,322 +30,283 @@ class SettingsTab extends StatelessWidget {
 
     return GradientScaffold(
       child: ListView(
-        padding: AppSpacing.pagePadding,
+        padding: AppSpacing.pagePadding(context),
         children: [
+          Text('Settings', style: theme.textTheme.headlineSmall),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            'Configure your spiritual practice',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurface.withAlpha(145),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
           SettingsSection(
-            title: 'Appearance',
-            icon: Icons.palette_outlined,
+            title: 'Selected Apps & Categories',
+            trailing: TextButton.icon(
+              onPressed: null,
+              icon: const Icon(Icons.edit_rounded),
+              label: const Text('Edit'),
+            ),
+            child: _MutedBox(
+              text: 'App/category picker UI placeholder. Blocking list is managed in native layer.',
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          SettingsSection(
+            title: 'Prayer Calculation',
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Theme', style: theme.textTheme.labelLarge),
-                const SizedBox(height: AppSpacing.sm),
-                SegmentedButton<AppThemeMode>(
-                  segments: AppThemeMode.values.map((mode) {
-                    return ButtonSegment(
-                      value: mode,
-                      label: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          ThemeModePreview(mode: mode),
-                          const SizedBox(width: AppSpacing.sm),
-                          Text(mode.displayName),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                  selected: {settings.themeMode},
-                  onSelectionChanged: (values) => settingsController.updateThemeMode(values.first),
+                _SettingRow(
+                  icon: Icons.public_rounded,
+                  label: 'Calculation Method',
+                  sublabel: settings.prayerCalcMethod.label,
+                  trailing: DropdownButtonHideUnderline(
+                    child: DropdownButton<PrayerCalcMethod>(
+                      value: settings.prayerCalcMethod,
+                      items: PrayerCalcMethod.values
+                          .map((m) => DropdownMenuItem(value: m, child: Text(m.label)))
+                          .toList(),
+                      onChanged: (value) {
+                        if (value != null) settingsController.updatePrayerMethod(value);
+                      },
+                    ),
+                  ),
+                ),
+                const Divider(height: 20),
+                _SettingRow(
+                  icon: Icons.straighten_rounded,
+                  label: 'Asr Calculation',
+                  sublabel: settings.strictnessMode.label,
+                  trailing: DropdownButtonHideUnderline(
+                    child: DropdownButton<StrictnessMode>(
+                      value: settings.strictnessMode,
+                      items: StrictnessMode.values
+                          .map((m) => DropdownMenuItem(value: m, child: Text(m.label)))
+                          .toList(),
+                      onChanged: (value) {
+                        if (value != null) settingsController.updateStrictness(value);
+                      },
+                    ),
+                  ),
+                ),
+                const Divider(height: 20),
+                _SettingRow(
+                  icon: Icons.location_on_outlined,
+                  label: 'Location',
+                  sublabel: 'Auto-detected from device',
+                  trailing: Icon(Icons.chevron_right_rounded, color: theme.colorScheme.onSurface.withAlpha(110)),
                 ),
               ],
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
           SettingsSection(
-            title: 'Lock Rules',
-            icon: Icons.lock_clock_outlined,
+            title: 'Appearance',
             child: Column(
               children: [
-                DropdownButtonFormField<PrayerCalcMethod>(
-                  initialValue: settings.prayerCalcMethod,
-                  decoration: const InputDecoration(labelText: 'Prayer method'),
-                  items: PrayerCalcMethod.values
-                      .map((m) => DropdownMenuItem(value: m, child: Text(m.label)))
-                      .toList(),
-                  onChanged: (value) {
-                    if (value != null) {
-                      settingsController.updatePrayerMethod(value);
-                    }
-                  },
+                _SettingRow(
+                  icon: settings.themeMode == AppThemeMode.discipline ? Icons.dark_mode : Icons.light_mode,
+                  label: 'Dark Mode',
+                  sublabel: settings.themeMode == AppThemeMode.discipline ? 'Enabled' : 'Disabled',
+                  trailing: Switch(
+                    value: settings.themeMode == AppThemeMode.discipline,
+                    onChanged: (enabled) {
+                      settingsController.updateThemeMode(
+                        enabled ? AppThemeMode.discipline : AppThemeMode.calm,
+                      );
+                    },
+                  ),
                 ),
-                const SizedBox(height: AppSpacing.md),
-                DropdownButtonFormField<StrictnessMode>(
-                  initialValue: settings.strictnessMode,
-                  decoration: const InputDecoration(labelText: 'Strictness'),
-                  items: StrictnessMode.values
-                      .map((m) => DropdownMenuItem(value: m, child: Text(m.label)))
-                      .toList(),
-                  onChanged: (value) {
-                    if (value != null) {
-                      settingsController.updateStrictness(value);
-                    }
-                  },
+                const Divider(height: 20),
+                _SettingRow(
+                  icon: Icons.language_rounded,
+                  label: 'Language',
+                  sublabel: 'English',
+                  trailing: Icon(Icons.chevron_right_rounded, color: theme.colorScheme.onSurface.withAlpha(110)),
                 ),
-                const SizedBox(height: AppSpacing.lg),
-                _LabeledSlider(
-                  label: 'Start before prayer',
-                  value: settings.lockBeforeMinutes.toDouble(),
-                  unit: 'min',
-                  min: 0,
-                  max: 30,
-                  divisions: 30,
-                  onChanged: (v) => settingsController.updateLockBefore(v.round()),
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                _LabeledSlider(
-                  label: 'End after adhan',
-                  value: settings.lockAfterMinutes.toDouble(),
-                  unit: 'min',
-                  min: 5,
-                  max: 45,
-                  divisions: 40,
-                  onChanged: (v) => settingsController.updateLockAfter(v.round()),
-                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          SettingsSection(
+            title: 'Support & Legal',
+            child: Column(
+              children: const [
+                _LinkRow(title: 'Contact Support', subtitle: 'Get Help'),
+                Divider(height: 20),
+                _LinkRow(title: 'Privacy Policy', subtitle: 'Read Privacy Policy'),
+                Divider(height: 20),
+                _LinkRow(title: 'Terms of Use', subtitle: 'Read Terms of Use'),
               ],
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
           SettingsSection(
             title: 'Subscription',
-            icon: Icons.workspace_premium_outlined,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.info_outline_rounded,
-                      size: 16,
-                      color: theme.colorScheme.onSurface.withAlpha(120),
-                    ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Text(
-                      'Annual plan - JPY 10,000/year',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: theme.colorScheme.onSurface.withAlpha(120),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: AppSpacing.md),
+                Text('Annual plan: JPY 10,000/year', style: theme.textTheme.bodySmall),
+                const SizedBox(height: AppSpacing.sm),
                 Row(
                   children: [
                     Expanded(
-                      child: FilledButton.icon(
-                        onPressed: subscriptionController.processing
-                            ? null
-                            : subscriptionController.purchaseAnnual,
-                        icon: const Icon(Icons.workspace_premium_rounded),
-                        label: Text(
-                          subscriptionController.processing ? 'Processing...' : 'Upgrade',
-                        ),
+                      child: FilledButton(
+                        onPressed: subscriptionController.processing ? null : subscriptionController.purchaseAnnual,
+                        child: Text(subscriptionController.processing ? 'Processing...' : 'Upgrade'),
                       ),
                     ),
                     const SizedBox(width: AppSpacing.sm),
                     OutlinedButton(
-                      onPressed: subscriptionController.processing
-                          ? null
-                          : subscriptionController.restorePurchases,
+                      onPressed: subscriptionController.processing ? null : subscriptionController.restorePurchases,
                       child: const Text('Restore'),
                     ),
                   ],
                 ),
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  'Current tier: ${subscriptionController.tier.label}',
-                  style: theme.textTheme.bodySmall,
-                ),
-                if (subscriptionController.lastError != null) ...[
-                  const SizedBox(height: AppSpacing.xs),
-                  Text(
-                    subscriptionController.lastError!,
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.error,
-                    ),
-                  ),
-                ],
-                const SizedBox(height: AppSpacing.sm),
-                SwitchListTile(
-                  contentPadding: EdgeInsets.zero,
-                  value: subscriptionController.earlySupporter,
-                  title: const Row(
-                    children: [
-                      Icon(Icons.favorite_rounded, size: 18),
-                      SizedBox(width: AppSpacing.sm),
-                      Text('Early supporter'),
-                    ],
-                  ),
-                  onChanged: subscriptionController.setEarlySupporter,
-                ),
               ],
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
-          if (authController.enabled) ...[
+          if (authController.enabled)
             SettingsSection(
               title: 'Account',
-              icon: Icons.person_outline_rounded,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
                 children: [
-                  Text(authController.user?.email ?? 'No active session', style: theme.textTheme.bodyMedium),
-                  const SizedBox(height: AppSpacing.sm),
-                  OutlinedButton.icon(
+                  Expanded(
+                    child: Text(authController.user?.email ?? 'No active session'),
+                  ),
+                  OutlinedButton(
                     onPressed: authController.processing ? null : authController.signOut,
-                    icon: const Icon(Icons.logout_rounded),
-                    label: const Text('Sign out'),
+                    child: const Text('Sign out'),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: AppSpacing.lg),
-          ],
-          SettingsSection(
-            title: 'Coming Soon',
-            icon: Icons.upcoming_outlined,
-            child: Wrap(
-              spacing: AppSpacing.sm,
-              runSpacing: AppSpacing.sm,
-              children: const [
-                _FeatureChip(icon: Icons.qr_code_scanner_rounded, label: 'Halal Scanner'),
-                _FeatureChip(icon: Icons.map_rounded, label: 'Masjid Map'),
-                _FeatureChip(icon: Icons.history_rounded, label: 'AI History'),
-                _FeatureChip(icon: Icons.headphones_rounded, label: 'Quran Audio'),
-              ],
-            ),
-          ),
-          const SizedBox(height: AppSpacing.lg),
+          if (authController.enabled) const SizedBox(height: AppSpacing.lg),
           SettingsSection(
             title: 'Diagnostics',
-            icon: Icons.health_and_safety_outlined,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
-                Text(
-                  'Recent events: ${diagnosticsController.events.length}',
-                  style: theme.textTheme.bodySmall,
+                Expanded(
+                  child: Text('Recent events: ${diagnosticsController.events.length}'),
                 ),
-                const SizedBox(height: AppSpacing.sm),
-                if (diagnosticsController.events.isNotEmpty)
-                  Text(
-                    '${diagnosticsController.events.first.level.toUpperCase()} - ${diagnosticsController.events.first.event}',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: theme.colorScheme.onSurface.withAlpha(140),
-                    ),
-                  ),
-                const SizedBox(height: AppSpacing.sm),
-                OutlinedButton(
-                  onPressed: diagnosticsController.clear,
-                  child: const Text('Clear logs'),
-                ),
+                OutlinedButton(onPressed: diagnosticsController.clear, child: const Text('Clear')),
               ],
             ),
           ),
-          const SizedBox(height: AppSpacing.xxxl),
+          const SizedBox(height: AppSpacing.xl),
+          Center(
+            child: Text(
+              'Version 1.0.0',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurface.withAlpha(130),
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xxl),
         ],
       ),
     );
   }
 }
 
-class _LabeledSlider extends StatelessWidget {
-  const _LabeledSlider({
+class _SettingRow extends StatelessWidget {
+  const _SettingRow({
+    required this.icon,
     required this.label,
-    required this.value,
-    required this.unit,
-    required this.min,
-    required this.max,
-    required this.divisions,
-    required this.onChanged,
+    required this.sublabel,
+    required this.trailing,
   });
 
+  final IconData icon;
   final String label;
-  final double value;
-  final String unit;
-  final double min;
-  final double max;
-  final int divisions;
-  final ValueChanged<double> onChanged;
+  final String sublabel;
+  final Widget trailing;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+    return Row(
       children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(label, style: theme.textTheme.bodyMedium),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 2),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.primary.withAlpha(15),
-                borderRadius: BorderRadius.circular(AppRadii.sm),
-              ),
-              child: Text(
-                '${value.round()} $unit',
-                style: theme.textTheme.labelMedium?.copyWith(
-                  color: theme.colorScheme.primary,
-                  fontWeight: FontWeight.w600,
+        Icon(icon, color: theme.colorScheme.primary),
+        const SizedBox(width: AppSpacing.md),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: theme.textTheme.titleSmall),
+              Text(
+                sublabel,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurface.withAlpha(140),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
-        Slider(
-          value: value,
-          min: min,
-          max: max,
-          divisions: divisions,
-          onChanged: onChanged,
-        ),
+        trailing,
       ],
     );
   }
 }
 
-class _FeatureChip extends StatelessWidget {
-  const _FeatureChip({required this.icon, required this.label});
+class _MutedBox extends StatelessWidget {
+  const _MutedBox({required this.text});
 
-  final IconData icon;
-  final String label;
+  final String text;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: theme.colorScheme.onSurface.withAlpha(8),
-        borderRadius: AppRadii.borderMd,
-        border: Border.all(color: theme.colorScheme.onSurface.withAlpha(15)),
+        borderRadius: BorderRadius.circular(12),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16, color: theme.colorScheme.onSurface.withAlpha(100)),
-          const SizedBox(width: AppSpacing.sm),
-          Text(
-            label,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurface.withAlpha(100),
-            ),
-          ),
-        ],
+      child: Text(
+        text,
+        style: theme.textTheme.bodyMedium?.copyWith(
+          color: theme.colorScheme.onSurface.withAlpha(145),
+        ),
       ),
     );
   }
 }
+
+class _LinkRow extends StatelessWidget {
+  const _LinkRow({required this.title, required this.subtitle});
+
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(title, style: theme.textTheme.titleSmall),
+              Text(
+                subtitle,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurface.withAlpha(145),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Icon(Icons.arrow_forward_rounded, color: theme.colorScheme.primary),
+      ],
+    );
+  }
+}
+

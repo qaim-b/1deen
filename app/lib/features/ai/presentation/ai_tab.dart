@@ -1,4 +1,4 @@
-import 'package:app/core/theme/app_spacing.dart';
+﻿import 'package:app/core/theme/app_spacing.dart';
 import 'package:app/features/ai/application/ai_service.dart';
 import 'package:app/features/ai/domain/ai_usage_snapshot.dart';
 import 'package:app/features/ai/presentation/widgets/chat_bubble.dart';
@@ -14,11 +14,13 @@ class AiTab extends StatefulWidget {
   const AiTab({
     required this.aiService,
     required this.subscriptionController,
+    this.embedded = false,
     super.key,
   });
 
   final AiService aiService;
   final SubscriptionController subscriptionController;
+  final bool embedded;
 
   @override
   State<AiTab> createState() => _AiTabState();
@@ -79,7 +81,9 @@ class _AiTabState extends State<AiTab> {
           // Scrollable content
           Expanded(
             child: ListView(
-              padding: AppSpacing.pagePadding,
+              padding: AppSpacing.pagePadding(context).copyWith(
+                top: widget.embedded ? AppSpacing.md : null,
+              ),
               children: [
                 AnimatedPanel(
                   title: 'DeenLearner',
@@ -183,3 +187,5 @@ class _AiTabState extends State<AiTab> {
     );
   }
 }
+
+

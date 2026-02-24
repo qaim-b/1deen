@@ -16,6 +16,7 @@ import 'package:app/features/habits/data/habit_repository.dart';
 import 'package:app/features/prayer_times/application/location_service.dart';
 import 'package:app/features/prayer_times/application/prayer_time_service.dart';
 import 'package:app/features/quran/data/quran_repository.dart';
+import 'package:app/features/quran/data/quran_local_store.dart';
 import 'package:app/features/salah_guard/application/lock_window_service.dart';
 import 'package:app/features/salah_guard/platform_bridge/method_channel_lock_bridge.dart';
 import 'package:app/features/settings/application/settings_controller.dart';
@@ -86,7 +87,7 @@ Future<void> main() async {
     lockWindowService: const LockWindowService(),
     calendarConflictService: CalendarConflictService(),
     habitController: HabitController(HabitRepository(appPreferences)),
-    quranRepository: QuranRepository(),
+    quranRepository: QuranRepository(QuranLocalStore(appPreferences)),
     aiService: AiService(AiUsageRepository(appPreferences)),
   );
 

@@ -1,4 +1,4 @@
-import 'package:app/core/animation/app_durations.dart';
+﻿import 'package:app/core/animation/app_durations.dart';
 import 'package:app/core/theme/app_spacing.dart';
 import 'package:flutter/material.dart';
 
@@ -84,7 +84,7 @@ class ShimmerList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.separated(
-      padding: AppSpacing.pagePadding,
+      padding: AppSpacing.pagePadding(context),
       physics: const NeverScrollableScrollPhysics(),
       itemCount: itemCount,
       separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.md),
@@ -92,3 +92,4 @@ class ShimmerList extends StatelessWidget {
     );
   }
 }
+

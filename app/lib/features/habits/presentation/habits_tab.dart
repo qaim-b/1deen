@@ -1,4 +1,4 @@
-import 'package:app/core/theme/app_spacing.dart';
+﻿import 'package:app/core/theme/app_spacing.dart';
 import 'package:app/features/habits/application/habit_controller.dart';
 import 'package:app/features/habits/domain/daily_habit.dart';
 import 'package:app/features/habits/presentation/widgets/habit_toggle_row.dart';
@@ -54,7 +54,7 @@ class _HabitsTabState extends State<HabitsTab> {
 
     return GradientScaffold(
       child: ListView(
-        padding: AppSpacing.pagePadding,
+        padding: AppSpacing.pagePadding(context),
         children: [
           // Overview card with progress ring
           AnimatedPanel(
@@ -139,3 +139,5 @@ class _HabitsTabState extends State<HabitsTab> {
     );
   }
 }
+
+

@@ -1,24 +1,24 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 
 class AppColors {
   const AppColors._();
 
-  // Calm (Light): serif editorial palette.
+  // Calm (Light): neutral grays with soft green accent.
   static const calmIvory = Color(0xFFFAFAF8);
   static const calmSand = Color(0xFFE8E4DF);
   static const calmSandLight = Color(0xFFF5F3F0);
   static const calmTeal = Color(0xFF1A1A1A);
   static const calmTealLight = Color(0xFF2E2E2E);
-  static const calmGold = Color(0xFFB8860B);
-  static const calmGoldLight = Color(0xFFD4A84B);
+  static const calmGold = Color(0xFF3CB878);
+  static const calmGoldLight = Color(0xFF74D7A5);
   static const calmSurface = Color(0xFFFFFFFF);
-  static const calmGreen = Color(0xFFB8860B);
+  static const calmGreen = Color(0xFF3CB878);
   static const calmRed = Color(0xFFCC3D3D);
   static const calmGlassWhite = Color(0x40FFFFFF);
   static const calmGlassBorder = Color(0x1AE8E4DF);
   static const calmDivider = Color(0xFFE8E4DF);
   static const calmNavBar = Color(0xF2FFFFFF);
-  static const calmNavIndicator = Color(0x14B8860B);
+  static const calmNavIndicator = Color(0x1F3CB878);
 
   // Discipline (Dark): deep graphite + electric green accent.
   static const disciplineCharcoal = Color(0xFF0A0A0A);
@@ -42,3 +42,4 @@ class AppColors {
   static const black = Color(0xFF000000);
   static const transparent = Color(0x00000000);
 }
+

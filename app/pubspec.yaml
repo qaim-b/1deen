@@ -67,6 +67,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/quran/quran_sample.json
+    - assets/quran/quran_full_en.json
 
   # To add assets to your application, add an assets section, like this:
   # assets:

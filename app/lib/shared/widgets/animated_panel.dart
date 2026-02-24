@@ -1,4 +1,4 @@
-import 'package:app/core/animation/app_durations.dart';
+﻿import 'package:app/core/animation/app_durations.dart';
 import 'package:app/core/theme/app_spacing.dart';
 import 'package:app/shared/widgets/section_header.dart';
 import 'package:flutter/material.dart';
@@ -37,7 +37,7 @@ class AnimatedPanel extends StatelessWidget {
       },
       child: Card(
         child: Padding(
-          padding: AppSpacing.cardPadding,
+          padding: AppSpacing.cardPaddingLegacy,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -51,3 +51,5 @@ class AnimatedPanel extends StatelessWidget {
     );
   }
 }
+
+

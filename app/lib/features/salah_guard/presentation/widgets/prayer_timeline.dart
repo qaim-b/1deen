@@ -1,5 +1,4 @@
-import 'package:app/core/theme/app_spacing.dart';
-import 'package:app/core/theme/app_theme.dart';
+﻿import 'package:app/core/theme/app_spacing.dart';
 import 'package:app/features/prayer_times/domain/prayer_time_entry.dart';
 import 'package:app/features/salah_guard/application/prayer_lock_window.dart';
 import 'package:flutter/material.dart';
@@ -19,167 +18,100 @@ class PrayerTimeline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     if (prayers.isEmpty) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
         child: Text(
-          'Tap "Refresh times" to calculate today\'s schedule.',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withAlpha(140),
-              ),
+          'Tap refresh to calculate prayer times.',
+          style: theme.textTheme.bodyMedium,
         ),
       );
     }
 
     return Column(
-      children: List.generate(prayers.length, (index) {
-        final prayer = prayers[index];
-        final isNext = nextWindow?.prayerName == prayer.name;
-        final isPast = prayer.time.isBefore(DateTime.now());
-
-        return _PrayerTimelineRow(
-          prayer: prayer,
-          timeFormat: timeFormat,
-          isNext: isNext,
-          isPast: isPast && !isNext,
-          isLast: index == prayers.length - 1,
-          index: index,
-          total: prayers.length,
-        );
-      }),
+      children: prayers
+          .where((p) => p.name != 'Sunrise')
+          .map((prayer) {
+            final isActive = nextWindow?.prayerName == prayer.name;
+            return _PrayerRow(
+              prayer: prayer,
+              isActive: isActive,
+              timeFormat: timeFormat,
+            );
+          })
+          .toList(growable: false),
     );
   }
 }
 
-class _PrayerTimelineRow extends StatelessWidget {
-  const _PrayerTimelineRow({
+class _PrayerRow extends StatelessWidget {
+  const _PrayerRow({
     required this.prayer,
+    required this.isActive,
     required this.timeFormat,
-    required this.isNext,
-    required this.isPast,
-    required this.isLast,
-    required this.index,
-    required this.total,
   });
 
   final PrayerTimeEntry prayer;
+  final bool isActive;
   final DateFormat timeFormat;
-  final bool isNext;
-  final bool isPast;
-  final bool isLast;
-  final int index;
-  final int total;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final ext = Theme.of(context).extension<AppExtendedTheme>()!;
-    final primaryColor = theme.colorScheme.primary;
-    final reduceMotion = MediaQuery.of(context).disableAnimations;
 
-    final dotColor = isNext
-        ? primaryColor
-        : isPast
-            ? ext.successColor
-            : theme.colorScheme.onSurface.withAlpha(60);
-
-    final textColor = isNext
-        ? theme.colorScheme.onSurface
-        : isPast
-            ? theme.colorScheme.onSurface.withAlpha(120)
-            : theme.colorScheme.onSurface.withAlpha(180);
-
-    return TweenAnimationBuilder<double>(
-      tween: Tween(begin: 0, end: 1),
-      duration: reduceMotion
-          ? Duration.zero
-          : Duration(milliseconds: 300 + index * 60),
-      curve: Curves.easeOutCubic,
-      builder: (context, value, child) {
-        return Opacity(
-          opacity: value,
-          child: Transform.translate(
-            offset: Offset(0, 8 * (1 - value)),
-            child: child,
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppSpacing.xs),
+      decoration: BoxDecoration(
+        color: isActive ? theme.colorScheme.primary.withAlpha(10) : theme.cardTheme.color,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isActive
+              ? theme.colorScheme.primary.withAlpha(40)
+              : theme.colorScheme.onSurface.withAlpha(10),
+        ),
+      ),
+      child: ListTile(
+        title: Text(
+          prayer.name,
+          style: theme.textTheme.titleSmall?.copyWith(fontWeight: isActive ? FontWeight.w700 : FontWeight.w600),
+        ),
+        subtitle: Text(
+          _arabicName(prayer.name),
+          style: theme.textTheme.bodySmall?.copyWith(
+            fontSize: 20,
+            fontFamily: 'Amiri',
+            color: theme.colorScheme.onSurface.withAlpha(140),
           ),
-        );
-      },
-      child: IntrinsicHeight(
-        child: Row(
-          children: [
-            // Timeline rail
-            SizedBox(
-              width: 32,
-              child: Column(
-                children: [
-                  // Dot
-                  Container(
-                    width: isNext ? 14 : 10,
-                    height: isNext ? 14 : 10,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: isNext ? dotColor : (isPast ? dotColor : Colors.transparent),
-                      border: Border.all(color: dotColor, width: 2),
-                      boxShadow: isNext
-                          ? [BoxShadow(color: dotColor.withAlpha(80), blurRadius: 8)]
-                          : null,
-                    ),
-                  ),
-                  // Line
-                  if (!isLast)
-                    Expanded(
-                      child: Container(
-                        width: 1.5,
-                        color: theme.colorScheme.onSurface.withAlpha(30),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            const SizedBox(width: AppSpacing.md),
-            // Content
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.lg),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            prayer.name,
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              color: textColor,
-                              fontWeight: isNext ? FontWeight.w700 : FontWeight.w600,
-                            ),
-                          ),
-                          if (isNext)
-                            Text(
-                              'Next prayer',
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                color: primaryColor.withAlpha(180),
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                    Text(
-                      timeFormat.format(prayer.time),
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        color: textColor,
-                        fontWeight: FontWeight.w700,
-                        fontFeatures: const [FontFeature.tabularFigures()],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
+        ),
+        trailing: Text(
+          timeFormat.format(prayer.time),
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontFeatures: const [FontFeature.tabularFigures()],
+            fontWeight: FontWeight.w700,
+          ),
         ),
       ),
     );
   }
+
+  String _arabicName(String english) {
+    switch (english) {
+      case 'Fajr':
+        return '?????';
+      case 'Dhuhr':
+        return '?????';
+      case 'Asr':
+        return '?????';
+      case 'Maghrib':
+        return '??????';
+      case 'Isha':
+        return '??????';
+      default:
+        return '';
+    }
+  }
 }
+
+
+

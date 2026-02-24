@@ -10,7 +10,6 @@ import 'package:app/features/salah_guard/presentation/widgets/hero_lock_card.dar
 import 'package:app/features/salah_guard/presentation/widgets/prayer_timeline.dart';
 import 'package:app/features/settings/application/settings_controller.dart';
 import 'package:app/features/settings/domain/app_settings.dart';
-import 'package:app/shared/widgets/animated_panel.dart';
 import 'package:app/shared/widgets/gradient_scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -59,11 +58,10 @@ class _GuardTabState extends State<GuardTab> {
     });
 
     try {
-      final position =
-          await widget.dependencies.locationService.getCurrentPosition();
+      final position = await widget.dependencies.locationService
+          .getCurrentPosition();
       final settings = widget.settingsController.settings;
-      final times =
-          widget.dependencies.prayerTimeService.getTodayPrayerTimes(
+      final times = widget.dependencies.prayerTimeService.getTodayPrayerTimes(
         latitude: position.latitude,
         longitude: position.longitude,
         method: settings.prayerCalcMethod,
@@ -89,7 +87,7 @@ class _GuardTabState extends State<GuardTab> {
         _nextWindow = nextWindow;
         _conflicts = conflicts;
         _statusMessage = conflicts.isNotEmpty
-            ? 'Conflict found. Consider delaying or skipping this lock window.'
+            ? 'Upcoming event conflicts with lock window.'
             : null;
       });
     } catch (error) {
@@ -112,8 +110,9 @@ class _GuardTabState extends State<GuardTab> {
       lockBeforeMinutes: settings.lockBeforeMinutes,
       lockAfterMinutes: settings.lockAfterMinutes,
     );
-    final blockedSynced = await widget.dependencies.lockBridge
-        .syncBlockedApps(defaultBlockedPackages);
+    final blockedSynced = await widget.dependencies.lockBridge.syncBlockedApps(
+      defaultBlockedPackages,
+    );
     var windowsSynced = true;
     if (_prayerTimes.isNotEmpty) {
       windowsSynced = await widget.dependencies.lockBridge.syncLockWindows(
@@ -128,7 +127,7 @@ class _GuardTabState extends State<GuardTab> {
       _syncingLock = false;
       _lockEngineHealthy = healthy;
       _statusMessage = (synced && blockedSynced && windowsSynced)
-          ? 'Lock configuration synced successfully.'
+          ? 'Lock configuration synced.'
           : 'Native sync failed.';
     });
   }
@@ -137,8 +136,9 @@ class _GuardTabState extends State<GuardTab> {
     required List<PrayerTimeEntry> prayerTimes,
     required AppSettings settings,
   }) async {
-    await widget.dependencies.lockBridge
-        .syncBlockedApps(defaultBlockedPackages);
+    await widget.dependencies.lockBridge.syncBlockedApps(
+      defaultBlockedPackages,
+    );
     await widget.dependencies.lockBridge.syncLockWindows(
       _buildLockWindowPayloads(prayerTimes, settings),
     );
@@ -153,10 +153,10 @@ class _GuardTabState extends State<GuardTab> {
         .map(
           (entry) => LockWindowPayload(
             prayerName: entry.name,
-            startAt: entry.time
-                .subtract(Duration(minutes: settings.lockBeforeMinutes)),
-            endAt:
-                entry.time.add(Duration(minutes: settings.lockAfterMinutes)),
+            startAt: entry.time.subtract(
+              Duration(minutes: settings.lockBeforeMinutes),
+            ),
+            endAt: entry.time.add(Duration(minutes: settings.lockAfterMinutes)),
           ),
         )
         .toList(growable: false);
@@ -165,11 +165,21 @@ class _GuardTabState extends State<GuardTab> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final settings = widget.settingsController.settings;
 
     return GradientScaffold(
       child: ListView(
-        padding: AppSpacing.pagePadding,
+        padding: AppSpacing.pagePadding(context),
         children: [
+          Text('Reflect', style: theme.textTheme.headlineSmall),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            'Protect Salah windows and keep your focus rhythm steady.',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurface.withAlpha(150),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
           HeroLockCard(
             nextWindow: _nextWindow,
             timeFormat: _timeFormat,
@@ -179,34 +189,198 @@ class _GuardTabState extends State<GuardTab> {
             onRefreshTimes: _loadPrayerTimes,
             onSyncLock: _syncLockConfiguration,
           ),
-          const SizedBox(height: AppSpacing.xl),
-          AnimatedPanel(
-            title: 'Prayer Times',
-            icon: Icons.access_time_rounded,
-            child: PrayerTimeline(
-              prayers: _prayerTimes,
-              timeFormat: _timeFormat,
-              nextWindow: _nextWindow,
+          const SizedBox(height: AppSpacing.lg),
+          Card(
+            child: Padding(
+              padding: AppSpacing.cardPadding(context),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Lock Strictness', style: theme.textTheme.titleMedium),
+                  const SizedBox(height: AppSpacing.sm),
+                  SegmentedButton<StrictnessMode>(
+                    segments: StrictnessMode.values
+                        .map(
+                          (mode) => ButtonSegment(
+                            value: mode,
+                            label: Text(mode.label),
+                          ),
+                        )
+                        .toList(growable: false),
+                    selected: {settings.strictnessMode},
+                    onSelectionChanged: (value) async {
+                      await widget.settingsController.updateStrictness(
+                        value.first,
+                      );
+                      if (!mounted) return;
+                      setState(() {});
+                    },
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                  Text(
+                    'Lock start before prayer: ${settings.lockBeforeMinutes} min',
+                  ),
+                  Slider(
+                    value: settings.lockBeforeMinutes.toDouble(),
+                    min: 5,
+                    max: 30,
+                    divisions: 25,
+                    label: '${settings.lockBeforeMinutes}m',
+                    onChanged: (v) async {
+                      await widget.settingsController.updateLockBefore(
+                        v.round(),
+                      );
+                      if (!mounted) return;
+                      setState(() {});
+                    },
+                  ),
+                  Text(
+                    'Lock end after adhan: ${settings.lockAfterMinutes} min',
+                  ),
+                  Slider(
+                    value: settings.lockAfterMinutes.toDouble(),
+                    min: 5,
+                    max: 45,
+                    divisions: 40,
+                    label: '${settings.lockAfterMinutes}m',
+                    onChanged: (v) async {
+                      await widget.settingsController.updateLockAfter(
+                        v.round(),
+                      );
+                      if (!mounted) return;
+                      setState(() {});
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
-          ConflictBanner(
-            conflicts: _conflicts,
-            timeFormat: _timeFormat,
+          Card(
+            child: Padding(
+              padding: AppSpacing.cardPadding(context),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Today\'s Prayer Times',
+                    style: theme.textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  PrayerTimeline(
+                    prayers: _prayerTimes,
+                    timeFormat: _timeFormat,
+                    nextWindow: _nextWindow,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          ConflictBanner(conflicts: _conflicts, timeFormat: _timeFormat),
+          const SizedBox(height: AppSpacing.lg),
+          Card(
+            child: Padding(
+              padding: AppSpacing.cardPadding(context),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Focus Checklist', style: theme.textTheme.titleMedium),
+                  const SizedBox(height: AppSpacing.sm),
+                  _ChecklistRow(label: 'Accessibility permission enabled'),
+                  _ChecklistRow(label: 'Overlay permission enabled'),
+                  _ChecklistRow(
+                    label:
+                        'Blocked apps configured (${defaultBlockedPackages.length})',
+                  ),
+                  _ChecklistRow(label: 'Emergency unlock available (30s)'),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Card(
+            child: Padding(
+              padding: AppSpacing.cardPadding(context),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Reflection Prompts',
+                    style: theme.textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  _PromptRow(
+                    prompt: 'What distracted me before the last prayer window?',
+                  ),
+                  _PromptRow(
+                    prompt: 'One small change for stronger khushu tomorrow.',
+                  ),
+                  _PromptRow(
+                    prompt: 'How can I protect Fajr from phone time tonight?',
+                  ),
+                ],
+              ),
+            ),
           ),
           if (_statusMessage != null) ...[
             const SizedBox(height: AppSpacing.lg),
-            AnimatedPanel(
-              title: 'Status',
-              icon: Icons.info_outline_rounded,
-              child: Text(
-                _statusMessage!,
-                style: theme.textTheme.bodyMedium,
+            Card(
+              child: Padding(
+                padding: AppSpacing.cardPadding(context),
+                child: Text(_statusMessage!, style: theme.textTheme.bodyMedium),
               ),
             ),
           ],
+          const SizedBox(height: AppSpacing.xxl),
         ],
       ),
+    );
+  }
+}
+
+class _ChecklistRow extends StatelessWidget {
+  const _ChecklistRow({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppSpacing.xs),
+      child: Row(
+        children: [
+          Icon(
+            Icons.check_circle_rounded,
+            color: theme.colorScheme.primary,
+            size: 18,
+          ),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(child: Text(label)),
+        ],
+      ),
+    );
+  }
+}
+
+class _PromptRow extends StatelessWidget {
+  const _PromptRow({required this.prompt});
+
+  final String prompt;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+      padding: const EdgeInsets.all(AppSpacing.sm),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: theme.colorScheme.surface,
+        border: Border.all(color: theme.colorScheme.onSurface.withAlpha(20)),
+      ),
+      child: Text(prompt, style: theme.textTheme.bodyMedium),
     );
   }
 }

@@ -1,4 +1,4 @@
-import 'dart:ui';
+﻿import 'dart:ui';
 
 import 'package:app/core/theme/app_spacing.dart';
 import 'package:app/core/theme/app_theme.dart';
@@ -8,7 +8,7 @@ class GlassmorphicCard extends StatelessWidget {
   const GlassmorphicCard({
     required this.child,
     this.borderRadius = AppRadii.lg,
-    this.padding = AppSpacing.cardPadding,
+    this.padding = AppSpacing.cardPaddingLegacy,
     super.key,
   });
 
@@ -37,3 +37,5 @@ class GlassmorphicCard extends StatelessWidget {
     );
   }
 }
+
+

@@ -1,4 +1,4 @@
-import 'dart:ui';
+﻿import 'dart:ui';
 
 import 'package:app/core/animation/app_durations.dart';
 import 'package:app/core/theme/app_spacing.dart';
@@ -47,7 +47,7 @@ class AnimatedNavBar extends StatelessWidget {
               color: theme.navigationBarTheme.backgroundColor?.withAlpha(ext.isDark ? 200 : 220),
               borderRadius: AppRadii.borderLg,
               border: Border.all(color: ext.dividerColor.withAlpha(110)),
-              boxShadow: AppShadows.soft(Colors.black),
+              boxShadow: AppShadows.soft(),
             ),
             child: Row(
               children: List.generate(items.length, (index) {
@@ -137,3 +137,4 @@ class _NavBarItemWidget extends StatelessWidget {
     );
   }
 }
+

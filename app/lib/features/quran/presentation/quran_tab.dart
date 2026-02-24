@@ -1,4 +1,4 @@
-import 'package:app/core/theme/app_spacing.dart';
+﻿import 'package:app/core/theme/app_spacing.dart';
 import 'package:app/features/quran/data/quran_repository.dart';
 import 'package:app/features/quran/domain/quran_ayah.dart';
 import 'package:app/features/quran/presentation/widgets/ayah_card.dart';
@@ -7,9 +7,14 @@ import 'package:app/shared/widgets/shimmer_placeholder.dart';
 import 'package:flutter/material.dart';
 
 class QuranTab extends StatefulWidget {
-  const QuranTab({required this.quranRepository, super.key});
+  const QuranTab({
+    required this.quranRepository,
+    this.embedded = false,
+    super.key,
+  });
 
   final QuranRepository quranRepository;
+  final bool embedded;
 
   @override
   State<QuranTab> createState() => _QuranTabState();
@@ -52,7 +57,9 @@ class _QuranTabState extends State<QuranTab> with TickerProviderStateMixin {
       child: _loading
           ? const ShimmerList(itemCount: 3, itemHeight: 180)
           : ListView.builder(
-              padding: AppSpacing.pagePadding,
+        padding: AppSpacing.pagePadding(context).copyWith(
+          top: widget.embedded ? AppSpacing.md : null,
+        ),
               itemCount: _ayahs.length,
               itemBuilder: (context, index) {
                 final total = _ayahs.length;
@@ -101,3 +108,5 @@ class _QuranTabState extends State<QuranTab> with TickerProviderStateMixin {
     );
   }
 }
+
+
