@@ -18,21 +18,105 @@
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A new Flutter project.">
+  <meta name="description" content="1Deen - Protect your Salah and build consistent daily worship.">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="app">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="1Deen">
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>app</title>
+  <title>1Deen</title>
   <link rel="manifest" href="manifest.json">
+  <style>
+    :root {
+      color-scheme: light dark;
+    }
+    body {
+      margin: 0;
+      font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f7fbff;
+    }
+    body.preload-dark {
+      background: #10151b;
+    }
+    #preload {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      background: radial-gradient(circle at top right, #eaf3ff 0%, #f7fbff 60%);
+      transition: opacity 260ms ease;
+    }
+    body.preload-dark #preload {
+      background: radial-gradient(circle at top right, #1b232e 0%, #10151b 60%);
+    }
+    #preload.hide {
+      opacity: 0;
+      pointer-events: none;
+    }
+    #preload .wrap {
+      text-align: center;
+      color: #121a25;
+    }
+    body.preload-dark #preload .wrap {
+      color: #ffffff;
+    }
+    #preload .logo {
+      width: 72px;
+      height: 72px;
+      border-radius: 22px;
+      margin: 0 auto 16px auto;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 30px;
+      color: #ffffff;
+      background: linear-gradient(135deg, #00ad7c, #2f80ed);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+    }
+    #preload .title {
+      font-size: 46px;
+      font-weight: 800;
+      margin: 0;
+      letter-spacing: 0.3px;
+    }
+    #preload .subtitle {
+      margin: 4px 0 0 0;
+      font-size: 15px;
+      opacity: 0.75;
+    }
+  </style>
+  <script>
+    (function () {
+      try {
+        var mode = localStorage.getItem('flutter.settings.theme_mode') || localStorage.getItem('settings.theme_mode');
+        if (mode === 'discipline') document.body.classList.add('preload-dark');
+      } catch (e) {}
+    })();
+    window.addEventListener('flutter-first-frame', function () {
+      var loader = document.getElementById('preload');
+      if (!loader) return;
+      loader.classList.add('hide');
+      setTimeout(function () {
+        loader.remove();
+      }, 320);
+    });
+  </script>
 </head>
 <body>
+  <div id="preload">
+    <div class="wrap">
+      <div class="logo">1D</div>
+      <h1 class="title">1Deen</h1>
+      <p class="subtitle">created by Sara & Isa</p>
+    </div>
+  </div>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

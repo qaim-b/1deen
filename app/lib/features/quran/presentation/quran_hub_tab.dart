@@ -3,8 +3,11 @@ import 'package:app/features/quran/data/quran_repository.dart';
 import 'package:app/features/quran/domain/quran_models.dart';
 import 'package:app/shared/widgets/gradient_scaffold.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 enum QuranSection { surahs, notes, bookmarks, search }
+
+enum QuranReadingMode { verseByVerse, readingFlow }
 
 class QuranHubTab extends StatefulWidget {
   const QuranHubTab({required this.repository, super.key});
@@ -82,7 +85,7 @@ class _QuranHubTabState extends State<QuranHubTab> {
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 Text(
-                  'Full Mushaf style, fully offline (Arabic + optional English translation).',
+                  'Full Mushaf style, fully offline with Arabic + translation controls.',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurface.withAlpha(160),
                   ),
@@ -180,7 +183,7 @@ class _RecentSurahsCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Recent Pages', style: theme.textTheme.titleMedium),
+            Text('Recent Surahs', style: theme.textTheme.titleMedium),
             const SizedBox(height: AppSpacing.sm),
             ...recentSurahIds.take(3).map((id) {
               final surah = surahs.where((s) => s.id == id).firstOrNull;
@@ -437,8 +440,9 @@ class QuranReaderPage extends StatefulWidget {
 
 class _QuranReaderPageState extends State<QuranReaderPage> {
   final _controller = ScrollController();
+  bool _showArabic = true;
   bool _showTranslation = false;
-  bool _mushafFlowMode = false;
+  QuranReadingMode _readingMode = QuranReadingMode.readingFlow;
 
   @override
   void initState() {
@@ -506,61 +510,91 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
     ).showSnackBar(const SnackBar(content: Text('Note saved')));
   }
 
+  void _onListenPressed() {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Listen is coming soon.')));
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colors = _ReaderPalette.fromTheme(theme);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF14171F),
+      backgroundColor: colors.background,
       appBar: AppBar(
-        backgroundColor: const Color(0xFF14171F),
-        foregroundColor: Colors.white,
+        backgroundColor: colors.background,
+        foregroundColor: colors.foreground,
+        titleSpacing: 14,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(widget.surah.transliteration),
             Text(
-              '${widget.surah.arabicName} - Juz ${_estimateJuz(widget.surah.id)}',
-              style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70),
+              'Page ${widget.surah.id}  Juz ${_estimateJuz(widget.surah.id)} / Hizb ${_estimateHizb(widget.surah.id)}',
+              style: theme.textTheme.bodySmall?.copyWith(color: colors.muted),
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            onPressed: () =>
-                setState(() => _showTranslation = !_showTranslation),
-            icon: Icon(
-              _showTranslation
-                  ? Icons.translate_rounded
-                  : Icons.g_translate_rounded,
+      ),
+      body: Column(
+        children: [
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              alignment: WrapAlignment.center,
+              children: [
+                ChoiceChip(
+                  label: const Text('Verse by Verse'),
+                  selected: _readingMode == QuranReadingMode.verseByVerse,
+                  onSelected: (_) => setState(
+                    () => _readingMode = QuranReadingMode.verseByVerse,
+                  ),
+                ),
+                ChoiceChip(
+                  label: const Text('Reading Mode'),
+                  selected: _readingMode == QuranReadingMode.readingFlow,
+                  onSelected: (_) => setState(
+                    () => _readingMode = QuranReadingMode.readingFlow,
+                  ),
+                ),
+                ActionChip(
+                  avatar: const Icon(Icons.play_arrow_rounded, size: 18),
+                  label: const Text('Listen'),
+                  onPressed: _onListenPressed,
+                ),
+                FilterChip(
+                  label: const Text('Arabic'),
+                  selected: _showArabic,
+                  onSelected: (v) => setState(() => _showArabic = v),
+                ),
+                FilterChip(
+                  label: const Text('Translation'),
+                  selected: _showTranslation,
+                  onSelected: (v) => setState(() => _showTranslation = v),
+                ),
+              ],
             ),
-            tooltip: _showTranslation
-                ? 'Hide English translation'
-                : 'Show English translation',
           ),
-          IconButton(
-            onPressed: () => setState(() => _mushafFlowMode = !_mushafFlowMode),
-            icon: Icon(
-              _mushafFlowMode
-                  ? Icons.view_agenda_rounded
-                  : Icons.view_stream_rounded,
-            ),
-            tooltip: _mushafFlowMode
-                ? 'Switch to verse-by-verse mode'
-                : 'Switch to mushaf flow mode',
+          const SizedBox(height: 10),
+          Expanded(
+            child: _readingMode == QuranReadingMode.readingFlow
+                ? _buildMushafFlow(theme, colors)
+                : _buildVerseByVerse(theme, colors),
           ),
         ],
       ),
-      body: _mushafFlowMode
-          ? _buildMushafFlow(theme)
-          : _buildVerseByVerse(theme),
     );
   }
 
-  Widget _buildVerseByVerse(ThemeData theme) {
+  Widget _buildVerseByVerse(ThemeData theme, _ReaderPalette colors) {
     return ListView.builder(
       controller: _controller,
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       itemCount: widget.surah.verses.length,
       itemBuilder: (context, index) {
         final verse = widget.surah.verses[index];
@@ -568,9 +602,9 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
           margin: const EdgeInsets.only(bottom: 10),
           padding: const EdgeInsets.fromLTRB(14, 10, 14, 14),
           decoration: BoxDecoration(
-            color: const Color(0xFF1A1E28),
+            color: colors.panel,
             borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: Colors.white.withAlpha(16)),
+            border: Border.all(color: colors.border),
           ),
           child: InkWell(
             borderRadius: BorderRadius.circular(14),
@@ -583,30 +617,35 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
                     Text(
                       '${widget.surah.id}:${verse.verseId}',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: Colors.white54,
+                        color: colors.muted,
                       ),
                     ),
                     const Spacer(),
                     IconButton(
-                      icon: const Icon(
+                      icon: Icon(
                         Icons.bookmark_add_outlined,
-                        color: Colors.white70,
+                        color: colors.muted,
                       ),
                       onPressed: () => _toggleBookmark(verse.verseId),
                     ),
                   ],
                 ),
-                Text(
-                  '${verse.arabic} ﴿${_toArabicIndic(verse.verseId)}﴾',
-                  textAlign: TextAlign.right,
-                  textDirection: TextDirection.rtl,
-                  style: const TextStyle(
-                    fontFamily: 'Amiri',
-                    color: Colors.white,
-                    fontSize: 34,
-                    height: 1.95,
+                if (_showArabic)
+                  Directionality(
+                    textDirection: TextDirection.rtl,
+                    child: Text(
+                      '${verse.arabic} (${verse.verseId})',
+                      textAlign: TextAlign.right,
+                      style: GoogleFonts.notoNaskhArabic(
+                        textStyle: TextStyle(
+                          color: colors.foreground,
+                          fontSize: 35,
+                          height: 1.95,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
                 if (_showTranslation) ...[
                   const SizedBox(height: 10),
                   Align(
@@ -614,7 +653,7 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
                     child: Text(
                       verse.english,
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: Colors.white70,
+                        color: colors.muted,
                         height: 1.6,
                       ),
                     ),
@@ -628,25 +667,25 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
     );
   }
 
-  Widget _buildMushafFlow(ThemeData theme) {
+  Widget _buildMushafFlow(ThemeData theme, _ReaderPalette colors) {
     final flowText = widget.surah.verses
-        .map((verse) => '${verse.arabic} ﴿${_toArabicIndic(verse.verseId)}﴾')
+        .map((verse) => '${verse.arabic} (${verse.verseId})')
         .join('   ');
 
     return ListView(
       controller: _controller,
-      padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
       children: [
         Row(
           children: [
             Text(
               'Juz ${_estimateJuz(widget.surah.id)}, Hizb ${_estimateHizb(widget.surah.id)}',
-              style: theme.textTheme.titleMedium?.copyWith(color: Colors.white70),
+              style: theme.textTheme.titleMedium?.copyWith(color: colors.muted),
             ),
             const Spacer(),
             Text(
               '${widget.surah.transliteration}  ${widget.surah.arabicName}',
-              style: theme.textTheme.titleMedium?.copyWith(color: Colors.white70),
+              style: theme.textTheme.titleMedium?.copyWith(color: colors.muted),
             ),
           ],
         ),
@@ -655,33 +694,35 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: Colors.white.withAlpha(55)),
-            color: Colors.white.withAlpha(6),
+            border: Border.all(color: colors.borderStrong),
+            color: colors.panel,
           ),
           child: Center(
             child: Text(
               widget.surah.arabicName,
-              style: const TextStyle(
-                fontFamily: 'Amiri',
-                color: Colors.white,
-                fontSize: 28,
-                height: 1.2,
+              style: GoogleFonts.notoNaskhArabic(
+                textStyle: TextStyle(
+                  color: colors.foreground,
+                  fontSize: 30,
+                  fontWeight: FontWeight.w700,
+                ),
               ),
             ),
           ),
         ),
         if (_showBismillah()) ...[
           const SizedBox(height: 18),
-          const Center(
+          Center(
             child: Text(
-              'بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ',
-              style: TextStyle(
-                fontFamily: 'Amiri',
-                color: Colors.white,
-                fontSize: 36,
-                height: 1.7,
-              ),
+              '?????? ??????? ???????????? ??????????',
               textDirection: TextDirection.rtl,
+              style: GoogleFonts.notoNaskhArabic(
+                textStyle: TextStyle(
+                  color: colors.foreground,
+                  fontSize: 38,
+                  height: 1.7,
+                ),
+              ),
             ),
           ),
         ],
@@ -689,24 +730,29 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
         Container(
           padding: const EdgeInsets.fromLTRB(18, 16, 18, 20),
           decoration: BoxDecoration(
-            color: const Color(0xFF1A1E28),
+            color: colors.panel,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.white.withAlpha(14)),
+            border: Border.all(color: colors.border),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                flowText,
-                textAlign: TextAlign.justify,
-                textDirection: TextDirection.rtl,
-                style: const TextStyle(
-                  fontFamily: 'Amiri',
-                  color: Colors.white,
-                  fontSize: 36,
-                  height: 2.0,
+              if (_showArabic)
+                Directionality(
+                  textDirection: TextDirection.rtl,
+                  child: Text(
+                    flowText,
+                    textAlign: TextAlign.justify,
+                    style: GoogleFonts.notoNaskhArabic(
+                      textStyle: TextStyle(
+                        color: colors.foreground,
+                        fontSize: 37,
+                        height: 2.0,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
               if (_showTranslation) ...[
                 const SizedBox(height: 20),
                 ...widget.surah.verses.map(
@@ -715,7 +761,7 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
                     child: Text(
                       '${verse.verseId}. ${verse.english}',
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: Colors.white70,
+                        color: colors.muted,
                         height: 1.6,
                       ),
                     ),
@@ -729,7 +775,7 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
         Center(
           child: Text(
             '${widget.surah.id}',
-            style: theme.textTheme.headlineSmall?.copyWith(color: Colors.white70),
+            style: theme.textTheme.headlineSmall?.copyWith(color: colors.muted),
           ),
         ),
       ],
@@ -737,19 +783,8 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
   }
 
   bool _showBismillah() {
-    if (widget.surah.id == 9) return false;
-    final first = widget.surah.verses.firstOrNull?.arabic.trim() ?? '';
-    final normalized = first.replaceAll(' ', '');
-    return !normalized.startsWith('بِسْمِ') && !normalized.startsWith('بسم');
-  }
-
-  String _toArabicIndic(int number) {
-    const digits = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
-    return number
-        .toString()
-        .split('')
-        .map((char) => digits[int.parse(char)])
-        .join();
+    if (widget.surah.id == 1 || widget.surah.id == 9) return false;
+    return true;
   }
 
   int _estimateJuz(int surahId) {
@@ -763,14 +798,44 @@ class _QuranReaderPageState extends State<QuranReaderPage> {
     return 30;
   }
 
-  String _estimateHizb(int surahId) {
-    if (surahId <= 2) return '1';
-    if (surahId <= 4) return '8';
-    if (surahId <= 9) return '12';
-    if (surahId <= 18) return '20';
-    if (surahId <= 36) return '32';
-    if (surahId <= 55) return '45';
-    return '60';
+  int _estimateHizb(int surahId) {
+    if (surahId <= 2) return 1;
+    if (surahId <= 4) return 8;
+    if (surahId <= 9) return 12;
+    if (surahId <= 18) return 20;
+    if (surahId <= 36) return 32;
+    if (surahId <= 55) return 45;
+    return 60;
+  }
+}
+
+class _ReaderPalette {
+  const _ReaderPalette({
+    required this.background,
+    required this.panel,
+    required this.foreground,
+    required this.muted,
+    required this.border,
+    required this.borderStrong,
+  });
+
+  final Color background;
+  final Color panel;
+  final Color foreground;
+  final Color muted;
+  final Color border;
+  final Color borderStrong;
+
+  factory _ReaderPalette.fromTheme(ThemeData theme) {
+    final dark = theme.brightness == Brightness.dark;
+    return _ReaderPalette(
+      background: dark ? const Color(0xFF14171F) : const Color(0xFFF8F9FB),
+      panel: dark ? const Color(0xFF1A1E28) : Colors.white,
+      foreground: dark ? Colors.white : const Color(0xFF161B22),
+      muted: dark ? Colors.white70 : const Color(0xFF4A5565),
+      border: dark ? Colors.white.withAlpha(20) : const Color(0xFFE3E7EF),
+      borderStrong: dark ? Colors.white.withAlpha(56) : const Color(0xFFCDD6E4),
+    );
   }
 }
 

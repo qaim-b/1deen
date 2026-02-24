@@ -141,13 +141,20 @@ class _BrandSplashState extends State<_BrandSplash>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final dark = theme.brightness == Brightness.dark;
+    final bgStart = dark ? const Color(0xFF10151B) : const Color(0xFFF7FAFF);
+    final bgEnd = dark ? const Color(0xFF1B232E) : const Color(0xFFEAF3FF);
+    final titleColor = dark ? Colors.white : const Color(0xFF121A25);
+    final subtitleColor = dark ? Colors.white70 : const Color(0xFF4E5C6E);
+
     return Scaffold(
       body: DecoratedBox(
-        decoration: const BoxDecoration(
+        decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF10151B), Color(0xFF1B232E)],
+            colors: [bgStart, bgEnd],
           ),
         ),
         child: Center(
@@ -167,8 +174,8 @@ class _BrandSplashState extends State<_BrandSplash>
                   Text(
                     '1Deen',
                     style: GoogleFonts.playfairDisplay(
-                      textStyle: const TextStyle(
-                        color: Colors.white,
+                      textStyle: TextStyle(
+                        color: titleColor,
                         fontSize: 52,
                         fontWeight: FontWeight.w700,
                         letterSpacing: 0.4,
@@ -179,8 +186,8 @@ class _BrandSplashState extends State<_BrandSplash>
                   Text(
                     'created by Sara & Isa',
                     style: GoogleFonts.dmSans(
-                      textStyle: const TextStyle(
-                        color: Colors.white70,
+                      textStyle: TextStyle(
+                        color: subtitleColor,
                         fontSize: 16,
                         letterSpacing: 0.3,
                       ),
